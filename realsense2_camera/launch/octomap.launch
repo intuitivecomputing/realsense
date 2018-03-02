@@ -1,0 +1,31 @@
+<launch>
+  <arg name="rgbd" default="false"/>
+  <arg name="depth" default="false"/>
+  <group if="$(arg depth)">
+    <include file="$(find realsense2_camera)/launch/demo_pointcloud.launch"/>
+	<node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
+		<param name="resolution" value="0.05" />		
+		<!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
+		<param name="frame_id" type="string" value="camera_link" />		
+		<!-- maximum range to integrate (speedup!) -->
+		<param name="sensor_model/max_range" value="5.0" />		
+		<!-- data source to integrate (PointCloud2) -->
+		<remap from="/cloud_in" to="/camera/depth/color/points" />	
+	</node>
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find realsense2_camera)/rviz/octomap.rviz" required="true" />
+</group>
+
+<group if="$(arg rgbd)">
+    <include file="$(find realsense2_camera)/launch/rs_rgbd.launch"/>
+	<node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
+		<param name="resolution" value="0.05" />		
+		<!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
+		<param name="frame_id" type="string" value="camera_link" />		
+		<!-- maximum range to integrate (speedup!) -->
+		<param name="sensor_model/max_range" value="5.0" />		
+		<!-- data source to integrate (PointCloud2) -->
+		<remap from="/cloud_in" to="/camera/depth_registered/points" />	
+	</node>
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find realsense2_camera)/rviz/octomap.rviz" required="true" />
+</group>
+</launch>

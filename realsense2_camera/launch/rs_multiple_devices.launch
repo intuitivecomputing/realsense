@@ -1,16 +1,58 @@
 <launch>
-  <arg name="serial_no_camera1"    default=""/> <!-- Note: Replace with actual serial number -->
-  <arg name="serial_no_camera2"    default=""/> <!-- Note: Replace with actual serial number -->
-
+  <arg name="serial_no_camera1"    default="750612071028"/> <!-- Note: 435 -->
+  <arg name="serial_no_camera2"    default="746112060889"/> <!-- Note: 410 -->
   <group ns="camera1">
     <include file="$(find realsense2_camera)/launch/includes/nodelet.launch.xml">
       <arg name="serial_no"    value="$(arg serial_no_camera1)"/>
+      <arg name="depth_width"       value="640"/>
+      <arg name="depth_height"      value="480"/>
+      <arg name="depth_fps"         value="30"/>
+      <arg name="color_width"       value="640"/>
+      <arg name="color_height"      value="480"/>
+      <arg name="color_fps"         value="30"/>
+      <arg name="enable_depth"      value="true"/>
+      <arg name="enable_color"      value="true"/>
+      <arg name="enable_infra1"     value="false"/>
+      <arg name="enable_infra2"     value="false"/>
+      <arg name="enable_fisheye"    value="false"/>
+      <arg name="enable_imu"        value="false"/>
+      <arg name="enable_pointcloud" value="true"/>
+      <arg name="enable_sync"       value="true"/>
     </include>
+    <node pkg="tf" type="static_transform_publisher" name="camera1_broadcaster" args ="1 1 1 0 0 0 camera_link camera1_link 100"/>
+    <node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
+		  <param name="resolution" value="0.05" />		
+		  <param name="frame_id" type="string" value="camera1_link" />		
+		  <param name="sensor_model/max_range" value="5.0" />		
+		  <remap from="/camera1/cloud_in" to="/camera1/depth/color/points" />	
+    </node>
   </group>
 
   <group ns="camera2">
     <include file="$(find realsense2_camera)/launch/includes/nodelet.launch.xml">
       <arg name="serial_no"    value="$(arg serial_no_camera2)"/>
+      <arg name="depth_width"       value="640"/>
+      <arg name="depth_height"      value="480"/>
+      <arg name="depth_fps"         value="30"/>
+      <arg name="color_width"       value="640"/>
+      <arg name="color_height"      value="480"/>
+      <arg name="color_fps"         value="30"/>
+      <arg name="enable_depth"      value="true"/>
+      <arg name="enable_color"      value="true"/>
+      <arg name="enable_infra1"     value="false"/>
+      <arg name="enable_infra2"     value="false"/>
+      <arg name="enable_fisheye"    value="false"/>
+      <arg name="enable_imu"        value="false"/>
+      <arg name="enable_pointcloud" value="true"/>
+      <arg name="enable_sync"       value="true"/>
     </include>
+    <node pkg="tf" type="static_transform_publisher" name="camera2_broadcaster" args ="-1 -1 -1 0 0 0 camera_link camera2_link 100"/>
+    <node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
+		  <param name="resolution" value="0.05" />		
+		  <param name="frame_id" type="string" value="camera2_link" />		
+		  <param name="sensor_model/max_range" value="5.0" />		
+		  <remap from="/camera2/cloud_in" to="/camera2/depth/color/points" />	
+    </node>
   </group>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find realsense2_camera)/rviz/octomap.rviz" required="true" />
 </launch>
